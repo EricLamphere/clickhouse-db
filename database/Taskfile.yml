@@ -21,4 +21,13 @@ tasks:
     cmds:
       - task: install
       - python3 -m venv ${VENV_NAME}
+      - task: update
+  
+  update:
+    description: |
+      Install requirements
+    cmds:
+      - |
+        source ${VENV_NAME}/bin/activate
+        pip3 install -r requirements/requirements.txt
       

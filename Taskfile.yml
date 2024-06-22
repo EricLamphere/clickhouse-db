@@ -14,7 +14,7 @@ tasks:
       - cd airflow && task setup && cd -
       - cd database && task setup && cd -
   
-  reset:
+  reset-venvs:
     description: |
       Removes all existing virtual environments
     cmds:
