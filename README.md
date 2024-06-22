@@ -10,10 +10,12 @@ brew install go-task
 
 
 ## TODO
+* **general**
+  * github actions to deploy dbt docs and run tests
 * **database**
   * Create load script that loads data into clickhouse database
 * **airflow**
-  * Create `compose.yml` file, enabling `docker compose up` to spin up airflow UI and run pipelines
+  * Create `Dockerfile` and `compose.yml` file, enabling `docker compose up` to spin up airflow UI and run pipelines
 * **dbt**
   * models
   * macros
