@@ -1,0 +1,29 @@
+version: '3'
+
+env:
+  VENV_NAME: '{{.VENV_NAME | default "venv"}}'
+
+tasks:
+  setup:
+    description: |
+      Setup virtual environment and install packages
+    cmds:
+      - python3 -m venv ${VENV_NAME}
+      - task: update
+      - task: start
+      
+  update:
+    description: |
+      Install modules into venv
+    cmds:
+      - ${VENV_NAME}/bin/pip3 install -r requirements.txt
+      - ${VENV_NAME}/bin/dbt deps
+  
+  start:
+    description: |
+      go-task runs everything in a custom shell, so things like activating virtual environments are not possible.
+      This task is mostly for printing the commands required for preparing your environment for dbt
+    cmds:
+      - echo "Run the following command"
+      - echo "source ${VENV_NAME}/bin/activate && source utils/sh/setup.sh"
+

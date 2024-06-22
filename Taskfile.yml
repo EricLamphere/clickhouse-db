@@ -1,0 +1,5 @@
+version: '3'
+
+includes:
+  dbt: ./dbt_clickhouse
+  # airflow: ./airflow
