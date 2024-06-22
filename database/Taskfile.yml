@@ -30,4 +30,12 @@ tasks:
       - |
         source ${VENV_NAME}/bin/activate
         pip3 install -r requirements/requirements.txt
+
+  start:
+    description: |
+      go-task runs everything in a custom shell, so things like activating virtual environments are not possible.
+      This task is mostly for printing the commands required for preparing your environment for dbt. `init.sh`
+      runs `eval $(task start)` to activate the virtual environment
+    cmds:
+      - echo "source ${VENV_NAME}/bin/activate"
       

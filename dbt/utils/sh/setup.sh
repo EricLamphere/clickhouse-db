@@ -1,2 +1,2 @@
 
-echo "Nothing to do"
+echo " > Nothing else to set up"

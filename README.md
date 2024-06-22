@@ -10,9 +10,6 @@ brew install go-task
 
 
 ## TODO
-* **General**
-  * Add an `init.sh` script to each folder
-    * Should run `eval $(task start)` where `task start` just `echo`'s the commands that need to be executed in the your shell environment
 * **database**
   * Create load script that loads data into clickhouse database
 * **airflow**
