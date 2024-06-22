@@ -1,14 +1,9 @@
-# Clickhouse dbt
+# Clickhouse Airflow Deployment
 
 ## Setup
 cd into the dbt directory
 ```sh
-cd dbt_clickhouse
-```
-
-If you don't have Taskfile installed, install it with
-```sh
-brew install go-task
+cd airflow
 ```
 
 Run the following to set everything up. Alternatively, run `source init.sh`
