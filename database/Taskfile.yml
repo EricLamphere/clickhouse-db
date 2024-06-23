@@ -4,7 +4,7 @@ env:
   VENV_NAME: '{{.VENV_NAME | default "venv"}}'
 
 tasks:
-  install:
+  install-local:
     description: |
       Install clickhouse via. curl
     cmds:
@@ -19,7 +19,6 @@ tasks:
     description: |
       Setup virtual environment and install packages
     cmds:
-      - task: install
       - python3 -m venv ${VENV_NAME}
       - task: update
   
