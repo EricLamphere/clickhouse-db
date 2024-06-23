@@ -18,7 +18,7 @@ tasks:
     cmds:
       - | 
         source ${VENV_NAME}/bin/activate
-        pip3 install -r requirements/requirements.txt
+        pip3 install -r requirements.txt
         dbt deps
   
   start:

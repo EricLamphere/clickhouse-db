@@ -10,7 +10,7 @@ tasks:
     description: |
       Set up all relevant resources
     cmds:
-      - cd dbt && task setup && cd -
+      - cd dags && task setup && cd -
       - cd airflow && task setup && cd -
       - cd database && task setup && cd -
   

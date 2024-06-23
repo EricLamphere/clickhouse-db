@@ -26,7 +26,7 @@ At the end of the day I'd like to have a parent `compose.yml` file that spins up
 #### Experiment
 I'd also like to experiment with the following things:
 * Connecting local ClickHouse server to DBeaver (my preferred free database tool)
-* Test connecting dbt to multiple data sources - this is one thing I haven't done before
+* Test connecting dbt to multiple data sources - this is one thing I haven't done before in dbt
 
 
 ## Setup
@@ -69,3 +69,7 @@ Everything else should get installed for you using `task setup`
 * [Taskfile docs](https://taskfile.dev/)
 * [Airflow docs](https://airflow.apache.org/docs/apache-airflow/stable/start.html)
 * [dbt docs](https://docs.getdbt.com/docs/introduction)
+* [astronomer-astro](https://astronomer.github.io/astronomer-cosmos/getting_started/astro.html)
+* Some other examples using different databases:
+  * [snowflake-dbt-airflow](https://medium.com/@murat_aydin/end-to-end-data-engineering-project-airflow-snowflake-dbt-docker-and-dockeroperator-469a1f969301)
+  * [postgres-dbt-airflow](https://github.com/konosp/dbt-airflow-docker-compose/tree/master)
