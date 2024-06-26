@@ -1,23 +1,45 @@
 version: '3'
 
+env:
+  VENV_NAME: '{{.VENV_NAME | default "venv"}}'
+
 includes:
-  dbt: ./dbt
+  dbt: ./dags
   airflow: ./airflow
   database: ./database
+
+
 
 tasks:
   setup:
     description: |
-      Set up all relevant resources
+      Setup virtual environment and install packages
     cmds:
-      - cd dags && task setup && cd -
-      - cd airflow && task setup && cd -
-      - cd database && task setup && cd -
+      - python3 -m venv ${VENV_NAME}
+      - task: update
+      - task: start
   
-  reset:
+  update:
+    description: |
+      Install packages into virtual environment
+    cmds:
+      - | 
+        source ${VENV_NAME}/bin/activate
+        pip3 install -r airflow/requirements.txt
+        pip3 install -r database/requirements.txt
+
+  start:
+    description: |
+      go-task runs everything in a custom shell, so things like activating virtual environments are not possible.
+      This task is mostly for printing the commands required for preparing your environment for dbt. `init.sh`
+      runs `eval $(task start)` to activate the virtual environment
+    cmds:
+      - echo "source ${VENV_NAME}/bin/activate && source utils/sh/setup.sh"
+
+  reset-venv:
     description: |
       Removes all existing virtual environments
     cmds:
-      - rm -rf dbt/venv
       - rm -rf airflow/venv
       - rm -rf database/venv
+      - rm -rf venv

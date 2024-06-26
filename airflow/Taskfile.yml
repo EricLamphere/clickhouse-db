@@ -23,6 +23,8 @@ tasks:
         source ${VENV_NAME}/bin/activate
         pip3 install "apache-airflow==${AIRFLOW_VERSION}" --constraint "https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
         pip3 install -r requirements/requirements.txt
+        export HOMEBREW_NO_AUTO_UPDATE=1
+        brew install astro
 
   start:
     description: |
