@@ -1,6 +1,7 @@
 from cosmos import DbtDag, ProjectConfig, ProfileConfig, ExecutionConfig
 from cosmos.profiles import PostgresUserPasswordProfileMapping
 from datetime import datetime
+import os
 
 profile_config = ProfileConfig(
     profile_name="default",
