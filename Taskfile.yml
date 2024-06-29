@@ -4,7 +4,6 @@ env:
   VENV_NAME: '{{.VENV_NAME | default "venv"}}'
 
 includes:
-  dbt: ./dags
   airflow: ./airflow
   database: ./database
 
@@ -34,7 +33,7 @@ tasks:
       This task is mostly for printing the commands required for preparing your environment for dbt. `init.sh`
       runs `eval $(task start)` to activate the virtual environment
     cmds:
-      - echo "source ${VENV_NAME}/bin/activate && source utils/sh/setup.sh"
+      - echo "source ${VENV_NAME}/bin/activate"
 
   reset-venv:
     description: |
