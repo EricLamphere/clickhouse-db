@@ -1,0 +1,55 @@
+version: 2
+
+models:
+  - name: stg_customers
+    description: Staging view for customers with standardized column names
+    columns:
+      - name: customer_id
+        description: Unique identifier for customers
+        tests:
+          - unique
+          - not_null
+      - name: is_active_flag
+        description: Boolean flag for active customers
+
+  - name: stg_products
+    description: Staging view for products with calculated profit margins
+    columns:
+      - name: product_id
+        description: Unique identifier for products
+        tests:
+          - unique
+          - not_null
+      - name: profit_margin
+        description: Profit margin in absolute terms (price - cost)
+      - name: profit_margin_pct
+        description: Profit margin as a percentage
+
+  - name: stg_orders
+    description: Staging view for orders with time-based derived fields
+    columns:
+      - name: order_id
+        description: Unique identifier for orders
+        tests:
+          - unique
+          - not_null
+      - name: customer_id
+        description: Foreign key to customers
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_customers')
+              field: customer_id
+
+  - name: stg_order_items
+    description: Staging view for order items with calculated line totals
+    columns:
+      - name: order_item_id
+        description: Unique identifier for order items
+        tests:
+          - unique
+          - not_null
+      - name: line_total
+        description: Total line amount after discounts
+        tests:
+          - not_null

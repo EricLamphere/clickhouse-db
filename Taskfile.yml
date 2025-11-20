@@ -1,0 +1,278 @@
+version: '3'
+
+vars:
+  PROJECT_NAME: clickhouse-db
+  COMPOSE_FILE: docker-compose.yml
+
+tasks:
+  # Setup and Installation
+  setup:
+    desc: Initial setup - install dependencies and prepare environment
+    cmds:
+      - task: check-docker
+      - cp .env.example .env
+      - echo "Setup complete! Edit .env file if needed, then run 'task up'"
+
+  check-docker:
+    desc: Check if Docker is running
+    cmds:
+      - docker info > /dev/null 2>&1 || (echo "Docker is not running. Please start Docker first." && exit 1)
+    silent: true
+
+  # Docker Compose Operations
+  up:
+    desc: Start all services (ClickHouse, Postgres, Airflow)
+    cmds:
+      - task: check-docker
+      - docker compose up -d
+      - echo "Services starting..."
+      - echo "ClickHouse - http://localhost:8123"
+      - echo "Airflow - http://localhost:8080 (admin/admin)"
+      - echo "Run 'task logs' to view logs"
+
+  down:
+    desc: Stop all services
+    cmds:
+      - docker compose down
+
+  restart:
+    desc: Restart all services
+    cmds:
+      - task: down
+      - task: up
+
+  clean:
+    desc: Stop services and remove volumes (WARNING - deletes all data!)
+    prompt: This will delete all data. Are you sure?
+    cmds:
+      - docker compose down -v
+      - echo "All services stopped and data removed"
+
+  # Logs
+  logs:
+    desc: View logs from all services
+    cmds:
+      - docker compose logs -f
+
+  logs-clickhouse:
+    desc: View ClickHouse logs
+    cmds:
+      - docker compose logs -f clickhouse
+
+  logs-airflow:
+    desc: View Airflow logs
+    cmds:
+      - docker compose logs -f airflow-webserver airflow-scheduler
+
+  logs-postgres:
+    desc: View Postgres logs
+    cmds:
+      - docker compose logs -f postgres
+
+  # Service Status
+  status:
+    desc: Check status of all services
+    cmds:
+      - docker compose ps
+
+  health:
+    desc: Check health of all services
+    cmds:
+      - docker compose ps -a
+
+  # ClickHouse Operations
+  clickhouse-client:
+    desc: Connect to ClickHouse client
+    cmds:
+      - docker compose exec clickhouse clickhouse-client --password clickhouse
+
+  clickhouse-query:
+    desc: Execute a ClickHouse query (usage - task clickhouse-query -- "SELECT 1")
+    cmds:
+      - docker compose exec clickhouse clickhouse-client --password clickhouse --query "{{.CLI_ARGS}}"
+
+  clickhouse-test:
+    desc: Test ClickHouse connection and show databases
+    cmds:
+      - echo "Testing ClickHouse connection..."
+      - docker compose exec clickhouse clickhouse-client --password clickhouse --query "SELECT version()"
+      - echo "\nDatabases:"
+      - docker compose exec clickhouse clickhouse-client --password clickhouse --query "SHOW DATABASES"
+      - echo "\nStaging tables:"
+      - docker compose exec clickhouse clickhouse-client --password clickhouse --query "SHOW TABLES FROM staging"
+
+  # Postgres Operations
+  postgres-client:
+    desc: Connect to Postgres client (source database)
+    cmds:
+      - docker compose exec postgres psql -U postgres -d source_db
+
+  postgres-query:
+    desc: Execute a Postgres query (usage - task postgres-query -- "SELECT 1")
+    cmds:
+      - docker compose exec postgres psql -U postgres -d source_db -c "{{.CLI_ARGS}}"
+
+  postgres-test:
+    desc: Test Postgres connection and show tables
+    cmds:
+      - echo "Testing Postgres connection..."
+      - docker compose exec postgres psql -U postgres -d source_db -c "SELECT version()"
+      - echo "\nSource schema tables:"
+      - docker compose exec postgres psql -U postgres -d source_db -c "\dt source.*"
+
+  # dbt Operations
+  dbt-deps:
+    desc: Install dbt dependencies
+    dir: dbt/clickhouse_analytics
+    cmds:
+      - dbt deps --profiles-dir ../
+
+  dbt-debug:
+    desc: Debug dbt connection
+    dir: dbt/clickhouse_analytics
+    cmds:
+      - dbt debug --profiles-dir ../
+
+  dbt-compile:
+    desc: Compile dbt models
+    dir: dbt/clickhouse_analytics
+    cmds:
+      - dbt compile --profiles-dir ../
+
+  dbt-run:
+    desc: Run dbt models
+    dir: dbt/clickhouse_analytics
+    cmds:
+      - dbt run --profiles-dir ../
+
+  dbt-test:
+    desc: Run dbt tests
+    dir: dbt/clickhouse_analytics
+    cmds:
+      - dbt test --profiles-dir ../
+
+  dbt-docs-generate:
+    desc: Generate dbt documentation
+    dir: dbt/clickhouse_analytics
+    cmds:
+      - dbt docs generate --profiles-dir ../
+
+  dbt-docs-serve:
+    desc: Serve dbt documentation
+    dir: dbt/clickhouse_analytics
+    cmds:
+      - dbt docs serve --profiles-dir ../
+
+  dbt-build:
+    desc: Run dbt models and tests
+    dir: dbt/clickhouse_analytics
+    cmds:
+      - dbt build --profiles-dir ../
+
+  dbt-clean:
+    desc: Clean dbt artifacts
+    dir: dbt/clickhouse_analytics
+    cmds:
+      - dbt clean
+
+  # Airflow Operations
+  airflow-init:
+    desc: Initialize Airflow (create admin user)
+    cmds:
+      - docker compose up airflow-init
+
+  airflow-trigger-dag:
+    desc: Trigger a DAG (usage - task airflow-trigger-dag -- dag_name)
+    cmds:
+      - docker compose exec airflow-webserver airflow dags trigger {{.CLI_ARGS}}
+
+  airflow-list-dags:
+    desc: List all Airflow DAGs
+    cmds:
+      - docker compose exec airflow-webserver airflow dags list
+
+  airflow-test-dag:
+    desc: Test connections DAG
+    cmds:
+      - docker compose exec airflow-webserver airflow dags trigger test_connections
+
+  airflow-analytics-dag:
+    desc: Trigger analytics pipeline DAG
+    cmds:
+      - docker compose exec airflow-webserver airflow dags trigger clickhouse_analytics_pipeline
+
+  # Data Operations
+  reload-data:
+    desc: Reload seed data into ClickHouse
+    cmds:
+      - echo "Clearing existing data..."
+      - docker compose exec clickhouse clickhouse-client --password clickhouse --query "TRUNCATE TABLE staging.customers"
+      - docker compose exec clickhouse clickhouse-client --password clickhouse --query "TRUNCATE TABLE staging.products"
+      - docker compose exec clickhouse clickhouse-client --password clickhouse --query "TRUNCATE TABLE staging.orders"
+      - docker compose exec clickhouse clickhouse-client --password clickhouse --query "TRUNCATE TABLE staging.order_items"
+      - echo "Loading new data..."
+      - docker compose exec clickhouse clickhouse-client --password clickhouse --queries-file /docker-entrypoint-initdb.d/03_load_csv_data.sql
+      - echo "Data reloaded successfully"
+
+  validate-data:
+    desc: Validate data in all tables
+    cmds:
+      - echo "Checking ClickHouse staging data..."
+      - docker compose exec clickhouse clickhouse-client --password clickhouse --query "SELECT 'customers' as table, count(*) as row_count FROM staging.customers UNION ALL SELECT 'products', count(*) FROM staging.products UNION ALL SELECT 'orders', count(*) FROM staging.orders UNION ALL SELECT 'order_items', count(*) FROM staging.order_items FORMAT Pretty"
+      - echo "\nChecking Postgres source data..."
+      - docker compose exec postgres psql -U postgres -d source_db -c "SELECT 'user_activities' as table, count(*) as row_count FROM source.user_activities UNION ALL SELECT 'inventory', count(*) FROM source.inventory UNION ALL SELECT 'payment_transactions', count(*) FROM source.payment_transactions"
+
+  # Development
+  build:
+    desc: Build Docker images
+    cmds:
+      - docker compose build
+
+  rebuild:
+    desc: Rebuild Docker images without cache
+    cmds:
+      - docker compose build --no-cache
+
+  shell-clickhouse:
+    desc: Open shell in ClickHouse container
+    cmds:
+      - docker compose exec clickhouse /bin/bash
+
+  shell-airflow:
+    desc: Open shell in Airflow webserver container
+    cmds:
+      - docker compose exec airflow-webserver /bin/bash
+
+  # Complete Pipeline
+  run-pipeline:
+    desc: Run complete data pipeline (setup -> load -> transform)
+    cmds:
+      - task: up
+      - echo "Waiting for services to be healthy..."
+      - sleep 30
+      - task: validate-data
+      - echo "\nTrigger dbt pipeline via Airflow at http://localhost:8080"
+      - echo "Or run 'task dbt-build' to test locally"
+
+  # Quick start
+  quickstart:
+    desc: Complete quickstart - setup and run everything
+    cmds:
+      - task: setup
+      - task: up
+      - echo "\nWaiting for services to initialize (60 seconds)..."
+      - sleep 60
+      - task: validate-data
+      - echo "\n=== Quickstart Complete ==="
+      - echo "ClickHouse - http://localhost:8123"
+      - echo "Airflow - http://localhost:8080 (admin/admin)"
+      - echo "\nNext steps:"
+      - echo "1. Visit Airflow UI and enable the 'clickhouse_analytics_pipeline' DAG"
+      - echo "2. Or run 'task dbt-build' to test dbt locally"
+      - echo "3. Run 'task clickhouse-test' to verify data"
+
+  # Help
+  default:
+    desc: Show available tasks
+    cmds:
+      - task --list

@@ -1,0 +1,21 @@
+clickhouse_analytics:
+  outputs:
+    dev:
+      type: clickhouse
+      schema: analytics
+      host: clickhouse
+      port: 8123
+      user: default
+      password: clickhouse
+      secure: false
+      verify: false
+      connect_timeout: 30
+      send_receive_timeout: 300
+      sync_request_timeout: 5
+      compress_block_size: 1048576
+      compression: lz4
+      # Custom settings for ClickHouse
+      custom_settings:
+        max_execution_time: 300
+        max_memory_usage: 10000000000
+  target: dev

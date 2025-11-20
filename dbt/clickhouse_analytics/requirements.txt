@@ -1,0 +1,6 @@
+# dbt ClickHouse adapter
+dbt-clickhouse==1.7.2
+
+# Additional utilities
+clickhouse-driver==0.2.6
+clickhouse-sqlalchemy==0.2.4

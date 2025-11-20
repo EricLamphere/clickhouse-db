@@ -1,0 +1,17 @@
+# Main project requirements
+
+# dbt with ClickHouse adapter
+dbt-clickhouse==1.7.2
+
+# Database drivers
+clickhouse-driver==0.2.6
+clickhouse-sqlalchemy==0.2.4
+psycopg2-binary==2.9.9
+
+# Data manipulation
+pandas==2.1.4
+numpy==1.26.3
+
+# Utilities
+pyyaml==6.0.1
+python-dotenv==1.0.0

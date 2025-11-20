@@ -1,75 +1,332 @@
-# Clickhouse | dbt | Airflow
-Database deployment and transformations using **ClickHouse** as the database, **dbt** for ETL, and **Airflow** for deployment
+# ClickHouse | dbt | Airflow Data Pipeline
 
+Production-ready data pipeline using **ClickHouse** as the analytical database, **dbt** for data transformation, **Airflow** with **Astronomer Cosmos** for orchestration, and **Docker Compose** for local development.
 
-## Goals
+## Features
 
-#### Learn ClickHouse & Airflow
-This is mostly just me messing around and trying to learn how things work. My expertise level out of 10 before this project:
-* ClickHouse: noob, 0
-* Airflow: noob, 0
-* dbt: experienced, ~8
-* docker: experienced, ~6-7
-* docker-compose: noobish, ~2
-* GitHub Actions: meh, ~3
-  * Lots of experience with GitLab CI/CD though
+- **ClickHouse OLAP Database**: High-performance columnar database optimized for analytical queries
+- **dbt Transformations**: Modular SQL-based data modeling with staging, intermediate, and mart layers
+- **Airflow Orchestration**: Automated pipeline scheduling and monitoring with Astronomer Cosmos integration
+- **PostgreSQL Source**: Simulated OLTP source database with logical replication support
+- **Docker Compose**: Complete local development environment with one command
+- **Sample Data**: Pre-loaded datasets for immediate testing and exploration
+- **Comprehensive Testing**: Built-in data quality tests and validation
 
-#### Create a Data Pipeline
-Aside from learning new things, my main goal for the repo itself is to create a data pipeline using
-* ClickHouse as the database
-* dbt for ETL
-* Airflow for deployment
-* docker-compose for container orchestration
+## Quick Start
 
-At the end of the day I'd like to have a parent `compose.yml` file that spins up a server for the ClickHouse database and Airflow UI. The ClickHouse database will have it's own initialization scripts that writes some seed data for the rest of the pipeline to handle. Airflow will use the `astronomer-cosmos` package to deploy dbt models and run tests.
+Get everything running in 60 seconds:
 
-#### Experiment
-I'd also like to experiment with the following things:
-* Connecting local ClickHouse server to DBeaver (my preferred free database tool)
-* Test connecting dbt to multiple data sources - this is one thing I haven't done before in dbt
+```bash
+# 1. Install prerequisites
+brew install docker go-task
 
+# 2. Start the pipeline
+task quickstart
 
-## Setup
-Things you'll need to install if you haven't already
-* dbt - `brew install dbt`
-* go-task - `brew install go-task`
-* Docker - [mac install](https://docs.docker.com/desktop/install/mac-install/)
-* docker-compose - `brew install docker-compose`
+# 3. Access services
+# ClickHouse: http://localhost:8123
+# Airflow UI: http://localhost:8080 (admin/admin)
+```
 
-Everything else should get installed for you using `task setup`
+That's it! The pipeline is now running with:
+- ClickHouse database with sample data
+- Airflow UI for orchestration
+- PostgreSQL source database
+- dbt models ready to transform data
 
+## What You Get
 
-## TODO
-* **general**
-  * [x] Set up repo structure
-    * [x] taskfiles
-    * [x] requirements files
-    * [x] venv
-    * [x] readme
-    * [x] init.sh
-  * [ ] github actions to spin up ClickHouse and Airflow servers
-  * [ ] parent `compose.yml` file that orchestrates everything
-* **database**
-  * [x] Set up `compose.yml` for spinning up ClickHouse server
-  * [ ] Change database and schema names
-  * [ ] Initialize different data?
-* **airflow**
-  * Create `Dockerfile` and `compose.yml` file, enabling `docker compose up` to spin up airflow UI and run pipelines
-* **dbt**
-  * models
-  * macros
-  * tests
+### Data Architecture
 
+```
+CSV Files + PostgreSQL → ClickHouse Staging → dbt Transformations → Analytics Marts
+```
+
+### Pre-built Models
+
+- **Staging**: Cleaned source data (customers, products, orders, order_items)
+- **Intermediate**: Business logic and enrichment
+- **Marts**:
+  - `dim_customers`: Customer dimension with lifetime metrics
+  - `dim_products`: Product dimension with sales analytics
+  - `fct_orders`: Order fact table with profitability
+  - `daily_sales_summary`: Aggregated daily metrics
+
+### Sample Data
+
+- 15 customers across 6 countries
+- 15 products in 3 categories
+- 20 orders with 32 line items
+- PostgreSQL tables with user activities, inventory, and payment transactions
+
+## Usage
+
+### Run the Complete Pipeline
+
+**Option 1: Via Airflow (Recommended)**
+1. Open http://localhost:8080 (admin/admin)
+2. Enable the `clickhouse_analytics_pipeline` DAG
+3. Trigger the DAG or wait for scheduled run
+
+**Option 2: Via dbt CLI**
+```bash
+task dbt-build  # Run all models and tests
+```
+
+### Common Operations
+
+```bash
+# Service Management
+task up           # Start all services
+task down         # Stop all services
+task status       # Check service health
+task logs         # View all logs
+
+# Data Operations
+task validate-data           # Check data in all tables
+task clickhouse-test         # Test ClickHouse connection
+task postgres-test           # Test PostgreSQL connection
+task reload-data            # Reload CSV data
+
+# dbt Operations
+task dbt-run                # Run dbt models
+task dbt-test               # Run dbt tests
+task dbt-docs-serve         # View dbt documentation
+
+# Airflow Operations
+task airflow-list-dags      # List all DAGs
+task airflow-analytics-dag  # Trigger analytics pipeline
+```
+
+### Query Data
+
+**ClickHouse Client:**
+```bash
+task clickhouse-client
+
+# Example queries:
+SELECT count(*) FROM staging.orders;
+SELECT * FROM marts.dim_customers LIMIT 10;
+SELECT * FROM marts.daily_sales_summary;
+```
+
+**PostgreSQL Client:**
+```bash
+task postgres-client
+
+# Example queries:
+SELECT count(*) FROM source.user_activities;
+SELECT * FROM source.inventory;
+```
+
+## Architecture
+
+### Technology Stack
+
+- **ClickHouse**: Analytical database (port 8123 HTTP, 9000 Native)
+- **PostgreSQL**: Source database (port 5432)
+- **Airflow**: Orchestration (port 8080)
+- **dbt**: Data transformation
+- **Astronomer Cosmos**: dbt-Airflow integration
+- **Docker Compose**: Container orchestration
+
+### Data Flow
+
+1. **Initial Load**: CSV files → ClickHouse staging tables
+2. **Replication**: PostgreSQL → ClickHouse (MaterializedPostgreSQL - future)
+3. **Transformation**: dbt stages → intermediate → marts
+4. **Orchestration**: Airflow schedules and monitors pipeline
+5. **Analytics**: Query marts for insights
+
+### dbt Model Layers
+
+```
+staging/          # Clean and standardize (views)
+  ├── stg_customers.sql
+  ├── stg_products.sql
+  ├── stg_orders.sql
+  └── stg_order_items.sql
+
+intermediate/     # Business logic (views)
+  ├── int_order_items_enriched.sql
+  └── int_customer_orders.sql
+
+marts/           # Analytics-ready (tables)
+  ├── core/
+  │   ├── dim_customers.sql
+  │   ├── dim_products.sql
+  │   └── fct_orders.sql
+  └── metrics/
+      └── daily_sales_summary.sql
+```
+
+## Project Structure
+
+```
+clickhouse-db/
+├── docker-compose.yml           # Service orchestration
+├── Taskfile.yml                # Common operations
+├── data/                       # CSV seed data
+├── clickhouse/                 # ClickHouse config & init
+├── postgres/                   # PostgreSQL init
+├── dbt/clickhouse_analytics/   # dbt project
+│   ├── models/                # SQL transformations
+│   └── tests/                 # Data quality tests
+└── airflow/                    # Airflow DAGs & config
+    └── dags/                  # Pipeline definitions
+```
+
+See [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) for complete details.
+
+## Documentation
+
+- **[SETUP.md](SETUP.md)**: Detailed setup and configuration guide
+- **[ARCHITECTURE.md](ARCHITECTURE.md)**: System architecture and design decisions
+- **[PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md)**: File organization and conventions
+
+## Development
+
+### Adding New Models
+
+1. Create SQL file in `dbt/clickhouse_analytics/models/`
+2. Add tests in corresponding `.yml` file
+3. Run `task dbt-run` to test
+4. Airflow automatically picks up new models via Cosmos
+
+### Connecting External Tools
+
+**DBeaver/DataGrip:**
+- Host: localhost
+- Port: 8123 (HTTP) or 9000 (Native)
+- Database: analytics
+- User: default
+- Password: clickhouse
+
+### Local dbt Development
+
+```bash
+cd dbt/clickhouse_analytics
+
+# Test connection
+dbt debug --profiles-dir ../
+
+# Compile without running
+dbt compile --profiles-dir ../
+
+# Run specific model
+dbt run --select stg_customers --profiles-dir ../
+
+# Run models with tag
+dbt run --select tag:staging --profiles-dir ../
+```
+
+## Monitoring
+
+### Airflow UI (http://localhost:8080)
+- DAG runs and task status
+- Task logs and error messages
+- Schedule management
+- Manual triggering
+
+### ClickHouse Metrics
+```sql
+-- Query performance
+SELECT query, query_duration_ms
+FROM system.query_log
+ORDER BY event_time DESC
+LIMIT 10;
+
+-- Table sizes
+SELECT
+    database,
+    table,
+    formatReadableSize(sum(bytes)) as size
+FROM system.parts
+GROUP BY database, table
+ORDER BY sum(bytes) DESC;
+```
+
+## Troubleshooting
+
+### Services won't start
+```bash
+docker info                    # Check Docker is running
+task status                   # Check service status
+task logs                     # View error logs
+```
+
+### No data in tables
+```bash
+task validate-data            # Check row counts
+task reload-data             # Reload CSV data
+task clickhouse-test         # Verify ClickHouse
+```
+
+### Airflow DAGs not visible
+```bash
+task logs-airflow            # Check scheduler logs
+task restart                 # Restart services
+```
+
+### dbt connection errors
+```bash
+task dbt-debug               # Test dbt connection
+task clickhouse-test         # Verify ClickHouse is running
+```
+
+## Production Deployment
+
+Before production:
+1. Change all default passwords in `.env`
+2. Enable ClickHouse authentication
+3. Use CeleryExecutor or KubernetesExecutor for Airflow
+4. Set up ClickHouse cluster with replication
+5. Implement backup strategy for volumes
+6. Configure monitoring and alerting
+7. Review security settings
+
+See [ARCHITECTURE.md](ARCHITECTURE.md) for production recommendations.
+
+## Contributing
+
+This project is a learning exercise and reference implementation. Feel free to:
+- Fork and experiment
+- Submit issues for bugs or questions
+- Propose enhancements via pull requests
 
 ## Resources
-* [ClickHouse quick start](https://clickhouse.com/docs/en/getting-started/quick-start)
-* [ClickHouse dbt docs](https://clickhouse.com/docs/en/integrations/dbt)
-* [ClickHouse compose recipes](https://github.com/ClickHouse/examples/blob/main/docker-compose-recipes/README.md)
-  * [ClickHouse & Postgres](https://github.com/ClickHouse/examples/tree/main/docker-compose-recipes/recipes/ch-and-postgres)
-* [Taskfile docs](https://taskfile.dev/)
-* [Airflow docs](https://airflow.apache.org/docs/apache-airflow/stable/start.html)
-* [dbt docs](https://docs.getdbt.com/docs/introduction)
-* [astronomer-astro](https://astronomer.github.io/astronomer-cosmos/getting_started/astro.html)
-* Some other examples using different databases:
-  * [snowflake-dbt-airflow](https://medium.com/@murat_aydin/end-to-end-data-engineering-project-airflow-snowflake-dbt-docker-and-dockeroperator-469a1f969301)
-  * [postgres-dbt-airflow](https://github.com/konosp/dbt-airflow-docker-compose/tree/master)
+
+### Documentation
+- [ClickHouse Docs](https://clickhouse.com/docs)
+- [dbt Documentation](https://docs.getdbt.com)
+- [Airflow Documentation](https://airflow.apache.org/docs)
+- [Astronomer Cosmos](https://astronomer.github.io/astronomer-cosmos/)
+- [Task Documentation](https://taskfile.dev/)
+
+### Related Examples
+- [ClickHouse Compose Recipes](https://github.com/ClickHouse/examples/blob/main/docker-compose-recipes/README.md)
+- [ClickHouse & Postgres Integration](https://github.com/ClickHouse/examples/tree/main/docker-compose-recipes/recipes/ch-and-postgres)
+- [dbt Best Practices](https://docs.getdbt.com/guides/best-practices)
+
+## License
+
+MIT License - See LICENSE file for details
+
+## Acknowledgments
+
+Built using:
+- ClickHouse by ClickHouse Inc.
+- dbt by dbt Labs
+- Apache Airflow by Apache Software Foundation
+- Astronomer Cosmos by Astronomer
+
+## Learning Goals
+
+This project demonstrates:
+- ClickHouse for high-performance analytics
+- dbt for maintainable data transformations
+- Airflow for production orchestration
+- Docker Compose for reproducible environments
+- Modern data engineering best practices
+
+Perfect for learning or as a template for your own data pipelines!

@@ -1,0 +1,16 @@
+customer_id,customer_name,email,country,signup_date,is_active
+1001,John Smith,john.smith@email.com,USA,2023-01-15,1
+1002,Emma Johnson,emma.j@email.com,UK,2023-02-20,1
+1003,Michael Chen,m.chen@email.com,Canada,2023-03-10,1
+1004,Sarah Williams,sarah.w@email.com,USA,2023-03-25,1
+1005,David Brown,d.brown@email.com,Australia,2023-04-05,1
+1006,Lisa Garcia,lisa.g@email.com,USA,2023-04-18,0
+1007,Robert Taylor,r.taylor@email.com,UK,2023-05-02,1
+1008,Maria Rodriguez,maria.r@email.com,Spain,2023-05-15,1
+1009,James Wilson,james.w@email.com,Canada,2023-06-01,1
+1010,Jennifer Martinez,jen.m@email.com,USA,2023-06-20,1
+1011,William Anderson,w.anderson@email.com,Germany,2023-07-05,1
+1012,Patricia Thomas,pat.t@email.com,France,2023-07-18,0
+1013,Richard Jackson,r.jackson@email.com,USA,2023-08-01,1
+1014,Linda White,linda.w@email.com,UK,2023-08-15,1
+1015,Charles Harris,c.harris@email.com,Australia,2023-09-01,1
