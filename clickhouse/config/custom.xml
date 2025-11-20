@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<clickhouse>
+    <!-- Listen on all interfaces -->
+    <listen_host>0.0.0.0</listen_host>
+
+    <!-- Enable query logging -->
+    <query_log>
+        <database>system</database>
+        <table>query_log</table>
+        <partition_by>toYYYYMM(event_date)</partition_by>
+        <flush_interval_milliseconds>7500</flush_interval_milliseconds>
+    </query_log>
+
+    <!-- User configuration -->
+    <users>
+        <default>
+            <password>clickhouse</password>
+            <networks>
+                <ip>::/0</ip>
+            </networks>
+            <profile>default</profile>
+            <quota>default</quota>
+        </default>
+    </users>
+
+    <!-- Performance settings -->
+    <profiles>
+        <default>
+            <max_memory_usage>10000000000</max_memory_usage>
+            <use_uncompressed_cache>0</use_uncompressed_cache>
+            <load_balancing>random</load_balancing>
+            <max_execution_time>300</max_execution_time>
+        </default>
+    </profiles>
+
+    <!-- Storage configuration -->
+    <storage_configuration>
+        <disks>
+            <default>
+            </default>
+        </disks>
+        <policies>
+            <default>
+                <volumes>
+                    <default>
+                        <disk>default</disk>
+                    </default>
+                </volumes>
+            </default>
+        </policies>
+    </storage_configuration>
+
+    <!-- PostgreSQL integration settings -->
+    <postgresql_connection_pools>
+        <postgres_source>
+            <host>postgres</host>
+            <port>5432</port>
+            <database>source_db</database>
+            <user>postgres</user>
+            <password>postgres</password>
+        </postgres_source>
+    </postgresql_connection_pools>
+</clickhouse>
