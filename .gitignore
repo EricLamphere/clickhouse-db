@@ -1,23 +1,11 @@
 # Python
-**/*venv
 __pycache__/
-
-venv/
-
-dbt/clickhouse_analytics/target/
-dbt/clickhouse_analytics/dbt_packages/
-dbt/clickhouse_analytics/logs/
-dbt/clickhouse_analytics/dbt_modules/
+.vscode/
+.DS_Store
+**/*venv
 
 airflow/logs/*
 airflow/*.log
 
-
-.env
-.env.local
-.vscode/
-.DS_Store
 *.log
-.coverage
 .pytest_cache/
-.DS_Store
