@@ -17,7 +17,7 @@ task --version
 
 ```bash
 # From project root
-task quickstart
+task start
 ```
 
 This command will:
@@ -31,7 +31,7 @@ Expected runtime: 60-90 seconds
 
 ## Access Points
 
-After quickstart completes:
+After `task start` completes:
 
 | Service | URL | Credentials |
 |---------|-----|-------------|
@@ -159,7 +159,7 @@ task logs-postgres
 
 ```bash
 # Edit a model
-nano dbt/clickhouse_analytics/models/marts/core/dim_customers.sql
+micro dbt/clickhouse_analytics/models/marts/core/dim_customers.sql
 
 # Test changes
 task dbt-run

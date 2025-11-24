@@ -21,7 +21,7 @@ Get everything running in 60 seconds:
 brew install docker go-task
 
 # 2. Start the pipeline
-task quickstart
+task start
 
 # 3. Access services
 # ClickHouse: http://localhost:8123
