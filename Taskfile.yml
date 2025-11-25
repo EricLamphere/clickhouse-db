@@ -48,6 +48,65 @@ tasks:
       - docker compose down -v
       - echo "All services stopped and data removed"
 
+
+
+  # Development
+  build:
+    desc: Build Docker images
+    cmds:
+      - docker compose build
+
+  rebuild:
+    desc: Rebuild Docker images without cache
+    cmds:
+      - docker compose build --no-cache
+
+  shell-clickhouse:
+    desc: Open shell in ClickHouse container
+    cmds:
+      - docker compose exec clickhouse /bin/bash
+
+  shell-airflow:
+    desc: Open shell in Airflow webserver container
+    cmds:
+      - docker compose exec airflow-webserver /bin/bash
+
+  # Complete Pipeline
+  run-pipeline:
+    desc: Run complete data pipeline (setup -> load -> transform)
+    cmds:
+      - task: up
+      - echo "Waiting for services to be healthy..."
+      - sleep 30
+      - task: validate-data
+      - echo "\nTrigger dbt pipeline via Airflow at http://localhost:8080"
+      - echo "Or run 'task dbt-build' to test locally"
+
+  # Quick start
+  start:
+    desc: Complete quickstart - setup and run everything
+    cmds:
+      - task: setup
+      - task: up
+      - echo "\nWaiting for services to initialize (60 seconds)..."
+      - sleep 60
+      - task: validate-data
+      
+      - echo "\n=== Quickstart Complete ==="
+      - echo "ClickHouse - http://localhost:8123"
+      - echo "Airflow - http://localhost:8080 (admin/admin)"
+      - echo "\nNext steps:"
+      - echo "1. Visit Airflow UI and enable the 'clickhouse_analytics_pipeline' DAG"
+      - echo "2. Or run 'task dbt-build' to test dbt locally"
+      - echo "3. Run 'task clickhouse-test' to verify data"
+
+  # Help
+  default:
+    desc: Show available tasks
+    cmds:
+      - task --list
+
+
   # Logs
   logs:
     desc: View logs from all services
@@ -222,57 +281,3 @@ tasks:
       - echo "\nChecking Postgres source data..."
       - docker compose exec postgres psql -U postgres -d source_db -c "SELECT 'user_activities' as table, count(*) as row_count FROM source.user_activities UNION ALL SELECT 'inventory', count(*) FROM source.inventory UNION ALL SELECT 'payment_transactions', count(*) FROM source.payment_transactions"
 
-  # Development
-  build:
-    desc: Build Docker images
-    cmds:
-      - docker compose build
-
-  rebuild:
-    desc: Rebuild Docker images without cache
-    cmds:
-      - docker compose build --no-cache
-
-  shell-clickhouse:
-    desc: Open shell in ClickHouse container
-    cmds:
-      - docker compose exec clickhouse /bin/bash
-
-  shell-airflow:
-    desc: Open shell in Airflow webserver container
-    cmds:
-      - docker compose exec airflow-webserver /bin/bash
-
-  # Complete Pipeline
-  run-pipeline:
-    desc: Run complete data pipeline (setup -> load -> transform)
-    cmds:
-      - task: up
-      - echo "Waiting for services to be healthy..."
-      - sleep 30
-      - task: validate-data
-      - echo "\nTrigger dbt pipeline via Airflow at http://localhost:8080"
-      - echo "Or run 'task dbt-build' to test locally"
-
-  # Quick start
-  start:
-    desc: Complete quickstart - setup and run everything
-    cmds:
-      - task: setup
-      - task: up
-      - echo "\nWaiting for services to initialize (60 seconds)..."
-      - sleep 60
-      - task: validate-data
-      - echo "\n=== Quickstart Complete ==="
-      - echo "ClickHouse - http://localhost:8123"
-      - echo "Airflow - http://localhost:8080 (admin/admin)"
-      - echo "\nNext steps:"
-      - echo "1. Visit Airflow UI and enable the 'clickhouse_analytics_pipeline' DAG"
-      - echo "2. Or run 'task dbt-build' to test dbt locally"
-      - echo "3. Run 'task clickhouse-test' to verify data"
-
-  # Help
-  default:
-    desc: Show available tasks
-    cmds:
-      - task --list
